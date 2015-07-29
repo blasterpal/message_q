@@ -17,8 +17,10 @@ RSpec.describe "MessageQ::BaseMessage" do
     })
   end
 
-  # TODO
   context "valid object initialization" do
+    it "be correct object" do
+      expect(message_klass).to be_a MessageQ::BaseMessage
+    end
   end
 
   context "validation and errors" do 
