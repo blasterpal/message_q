@@ -3,7 +3,6 @@ require 'spec_helper'
 RSpec.describe "MessageQ::Publisher" do 
   include ClassBuilder
   include_context "message_contexts"
-  include MockQueue
 
   let(:message_klass) { SomeCoolEventMessage }
   let(:message_klass_instance) { message_klass.new(message_klass_options) }
