@@ -45,7 +45,26 @@ RSpec.describe "MessageQ::Consumer" do
   end
 
   context "invalid class and errors" do
-    context "process_message not implemented"
-    context "message_class not called"
+    context "process_message not implemented" do
+      let!(:no_process_method_consumer) do 
+        define_class(:BarFooMessageConsumer,MessageQ::Consumer) do 
+          from_queue 'a-nice-queue'
+          message_class SomeEvent
+        end
+      end
+      it { expect{BarFooMessageConsumer.new.work(valid_serialized_message)}.to raise_error }
+    end
+
+    context "message_class not called" do
+      let!(:no_message_klass_consumer) do 
+        define_class(:BarBazMessageConsumer,MessageQ::Consumer) do 
+          from_queue 'a-nice-queue'
+          def process_message
+            CoolModel.new.do_something(message.to_hash)
+          end
+        end
+      end
+      it { expect{BarBazMessageConsumer.new.work(valid_serialized_message)}.to raise_error }
+    end
   end
 end

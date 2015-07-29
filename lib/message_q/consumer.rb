@@ -7,13 +7,10 @@ module MessageQ
     #https://github.com/jondot/sneakers/wiki/Configuration#local-per-worker
     
     attr_reader :message 
-    def initialize
-      # class eval and create methods? (send is slower)
-    end
 
     def work(msg)
       sym_message = JSON.parse(msg, symbolize_names: true)
-      @message = @@message_klass.new(sym_message)
+      @message = message_klass.new(sym_message)
       process_message
     end
 
@@ -21,9 +18,17 @@ module MessageQ
       raise NotImplementedError
     end
 
+    def message_klass
+require 'pry';binding.pry
+      unless defined?(@@message_klass)
+        raise NotImplementedError 
+      end
+      @@message_klass
+    end
+
     # message_class DeliverReport
     def self.message_class(klass_name)
-      @@message_klass = klass_name
+      @@message_klass = klass_name.to_s.safe_constantize
     end
 
   end
