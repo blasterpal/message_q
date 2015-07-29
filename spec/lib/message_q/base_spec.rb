@@ -4,52 +4,77 @@ RSpec.describe "MessageQ::BaseMessage" do
   include ClassBuilder
   include_context "message_contexts"
 
+  let(:message_klass) { SomeCoolEventMessage }
+  let(:consume) do 
+    message_klass_instance.work(message_to_consume)
+  end
+  let(:message_klass_instance) { message_klass.new(message_klass_options) }
+  let(:message_to_consume) { valid_serialized_message }
+  let(:message_klass_options) do 
+    base_required_options.merge!({
+      some_field: some_field_val,
+      strict: true
+    })
+  end
+
+  # TODO
+  context "valid object initialization" do
+  end
 
   context "validation and errors" do 
     context "creating new message class without validate method" do 
+      let(:message_klass) { NoValidateEventMessage }
       it "should raise exception" do
-        expect{klass_validate_not_impl.new(base_required_options)}.to raise_error
+        expect{message_klass_instance}.to raise_error
       end
     end
-    context "validation of required fields" do
-      it "should raise exception" do
-        expect{klass_validate_not_impl.new(base_required_options)}.to raise_error
+    context "validation" do 
+      context "strict" do
+        let(:message_klass_options) do 
+          base_required_options.merge!({})
+        end
+        it "should raise exception with object errors" do
+          expect{message_klass_instance}.to raise_error
+        end
+        context "validation of base required fields" do
+          it "should raise exception" do
+            expect{message_klass.new({})}.to raise_error
+          end
+        end
       end
-      it "should have validation errors" do
-        expect{valid_klass.new(base_required_options)}.to raise_error
+      context "strict is false" do 
+        let(:message_klass_options) do 
+          base_required_options.merge!({
+            strict: false
+          })
+        end
+        context "missing option for class" do
+          it "should have validation errors" do
+            expect(message_klass_instance.validate).to eq({:some_field => 'has a problemo'})
+          end
+        end
+        context "missing base and class options" do
+          let(:message_klass_options) do 
+            {
+              strict: false
+            }
+          end
+          it "should have validation errors" do
+            expect(message_klass_instance.validate).to eq(
+              {
+                :created_at=>"Not convertable to DateTime or too old",
+                :uid=>"UID must be present",
+                :some_field=>"has a problemo"}
+            )
+          end
+        end
       end
     end
-  end
 
-  context "validation" do 
-    it "should raise exception with object errors" do
-      expect{valid_klass.new(base_required_options.merge!)}.to raise_error
-    end
-    it "should have validation errors" do
-        k = valid_klass.new(base_required_options.merge!(strict: false))
-        expect(k.validate).to eq({:some_field => 'has a problemo'})
-    end
-    context "validation of base required fields" do
-      it "should raise exception" do
-        expect{klass_validate_not_impl.new({})}.to raise_error
-      end
-      it "should have validation errors" do
-        k = valid_klass.new(strict: false)
-        expect(k.validate).to eq(
-          {
-            :created_at=>"Not convertable to DateTime or too old",
-            :uid=>"UID must be present",
-            :some_field=>"has a problemo"}
-        )
-      end
-    end
     context "serialization" do
-      let(:message_hash) do 
-        {:some_field=>"a nice value", :created_at=>"1234567890", :errors=>{}, :max_age=>3600, :status=>"new", :strict=>true, :uid=>"123"}
-      end
+      let(:message_klass_options) { valid_message_hash }
       it "should have attributes in JSON" do
-        msg = valid_klass.new(message_hash)
-        expect(msg.serialize).to eq(message_hash.to_json)
+        expect(message_klass_instance.serialize).to eq(valid_message_hash.to_json)
       end
     end
   end

@@ -5,4 +5,6 @@ require 'faker'
 require 'message_q'
 require 'class_builder'
 require 'message_contexts'
+require 'test_klasses'
+
 

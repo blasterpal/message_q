@@ -19,7 +19,6 @@ module MessageQ
     end
 
     def message_klass
-#require 'pry';binding.pry
       unless defined?(@@message_klass)
         raise NotImplementedError 
       end
