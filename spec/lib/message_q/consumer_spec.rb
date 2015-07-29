@@ -7,7 +7,7 @@ RSpec.describe "MessageQ::Consumer" do
   let!(:some_model) do 
     define_class(:CoolModel) do 
       def do_something(message)
-        message.some_field.upcase
+        message[:some_field].upcase
       end
     end
   end
@@ -36,6 +36,7 @@ RSpec.describe "MessageQ::Consumer" do
         consume 
       end
     end
+
     context "process_message" do
       it "should call method correctly" do 
         expect(consume).to eq(some_field_val.upcase)
