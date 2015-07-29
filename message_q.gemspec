@@ -36,5 +36,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "activesupport", "~> 4.0"
   spec.add_development_dependency "pry", "~> 0.10"
+  spec.add_development_dependency "faker", "~> 1.4"
 
 end
