@@ -1,12 +1,20 @@
 require 'sneakers'
+require 'active_support/all'
 
 module MessageQ
   class Consumer
     include ::Sneakers::Worker
     #from_queue needs to be implemented in subclass and can also include per consumer config
     #https://github.com/jondot/sneakers/wiki/Configuration#local-per-worker
-    
-    attr_reader :message 
+
+    class_attribute :message_class
+    attr_reader :message
+
+    def initialize
+      if self.message_class.nil?
+        raise NotImplementedError.new('Must specify message class with using_message :some_class')
+      end
+    end
 
     def work(msg)
       sym_message = JSON.parse(msg, symbolize_names: true)
@@ -17,17 +25,12 @@ module MessageQ
     def process_message
       raise NotImplementedError
     end
-
-    def message_klass
-      unless defined?(@@message_klass)
-        raise NotImplementedError 
-      end
-      @@message_klass
-    end
-
-    # message_class DeliverReport
-    def self.message_class(klass_name)
-      @@message_klass = klass_name.to_s.safe_constantize
+    
+    # using_message :some_class
+    # also SomeClass is ok
+    def self.using_message(klass)
+      c = klass.to_s.classify
+      self.message_class = c.to_s.safe_constantize
     end
 
   end
