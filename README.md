@@ -42,6 +42,12 @@ Similar to the `BaseMessage`, this must be extended and is essential (at present
 
 See source code for more info like above.
 
+### MessageQ::Publisher
+
+Simple class. Call class method `publish!` with a `MessageQ::BaseMessage` subclass, the `queue` name and an options hash (optional). 
+
+It will serialize the object and place on the queue.
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/message_q.
