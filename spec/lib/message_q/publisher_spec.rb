@@ -44,7 +44,7 @@ RSpec.describe "MessageQ::Publisher" do
       let(:publish_arguments) do 
         [Object.new,'',{}]
       end
-      xit "should raise error" do
+      it "should raise error" do
         expect{publish}.to raise_error
       end
     end
