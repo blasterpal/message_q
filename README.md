@@ -1,9 +1,5 @@
 # MessageQ
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/message_q`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
-
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -20,15 +16,31 @@ Or install it yourself as:
 
     $ gem install message_q
 
+This Gem presently is focused on Sneakers and RabbitMQ integration but attempts to extract a lot of code into objects that could later be more de-decoupled to Sidekiq, ZeroMQ or whatever.
+
 ## Usage
 
-TODO: Write usage instructions here
+ATM you must create intializers for Sneakers config,etc. 
 
-## Development
+This Gem is for `Consumer` worker processes that deserialize JSON into a `MessageQ::BaseMessage` subclass. The latter allows for simple validation hooks. 
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake rspec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+### MessageQ::BaseMessage
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+This class is abstract and must be extended. It enforces the following required attributes:
+
+* `uid` a non empty string
+* `created_at` a 10 digit epoch timestamp
+
+#### Extending MessageQ::BaseMessage
+
+The tests have plenty of good examples. See `spec/support/test_klasses.rb`
+
+
+### MessageQ::Consumer
+
+Similar to the `BaseMessage`, this must be extended and is essential (at present) a `Sneakers::Worker` class with some sugar. Messages are automatically processed with a `MessageQ::BaseClass` subclass (you specify) and then a handler method is called `process_method` that you implement and use the `message` attribute to do your work. This is the actual `BaseMessage` type which has `to_hash` and `to_json` as well as accessors.
+
+See source code for more info like above.
 
 ## Contributing
 
