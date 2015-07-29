@@ -4,9 +4,7 @@ module MessageQ
   class BaseMessage
     class MessageFieldTypeError < StandardError;end
 
-    attr_reader :queue
     attr_reader :errors
-    attr_reader :strict
     
     # required
     attr_accessor :created_at #integer for epoch(seconds), pop and convert to DateTime
@@ -26,7 +24,7 @@ module MessageQ
       @errors             = Errors.new
       @max_age            = (attrs[:max_age] && attrs[:max_age].to_i) || DEFAULT_MAX_AGE
       @status             = attrs[:status] || 'new' #add a struct later on
-      @strict = attrs[:strict].nil? ? true : attrs[:strict]
+      @strict             = attrs[:strict].nil? ? true : attrs[:strict]
       @uid                = attrs[:uid]
       
       if @strict
@@ -35,17 +33,17 @@ module MessageQ
       check_meta
     end
 
-    def valid?
-      self.errors.empty?
+    def to_hash
+      h = instance_variables.map do |var|
+        [var[1..-1].to_sym, instance_variable_get(var)]
+      end.to_h
+      h[:errors] = self.errors.messages
+      h
     end
-
-    # for putting back onto queue
-    def to_json
-      raise NotImplementedError
-    end
-
-    def self.set_queue(queue_name)
-      @queue = queue_name    
+    
+    # override to_json on subclass as necc
+    def serialize
+      self.to_hash.to_json
     end
 
     def validate!
@@ -53,6 +51,10 @@ module MessageQ
       unless errors.empty?
         raise MessageFieldTypeError.new("Errors: #{errors.messages}")
       end
+    end
+
+    def valid?
+      self.errors.empty?
     end
 
     def validate
@@ -72,7 +74,5 @@ module MessageQ
         false
       end
     end
-
-
   end
 end
