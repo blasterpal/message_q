@@ -18,7 +18,7 @@ module MessageQ
 
     def work(msg)
       sym_message = JSON.parse(msg, symbolize_names: true)
-      @message = message_klass.new(sym_message)
+      @message = message_class.new(sym_message)
       process_message
     end
 
